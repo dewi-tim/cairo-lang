@@ -53,7 +53,7 @@ class StarknetContract:
         state: StarknetState,
         abi: AbiType,
         contract_address: CastableToAddress,
-        deploy_execution_info: StarknetTransactionExecutionInfo,
+        deploy_execution_info: TransactionExecutionInfo,
     ):
         self.state = state
         self.abi = abi
@@ -301,7 +301,7 @@ class StarknetContractFunctionInvocation:
         """
         Executes the function call and apply changes on the given state.
         """
-        execution_info = await state.invoke_raw(
+        return state.invoke_raw(
             contract_address=self.contract_address,
             selector=self.name,
             calldata=self.calldata,
@@ -309,7 +309,6 @@ class StarknetContractFunctionInvocation:
             max_fee=max_fee,
             signature=None if signature is None else cast_to_felts(values=signature),
         )
-        return execution_info
 
     def _build_events(self, raw_events: List[OrderedEvent]) -> List[Dataclass]:
         """
