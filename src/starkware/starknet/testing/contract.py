@@ -28,6 +28,7 @@ from starkware.starknet.testing.contract_utils import (
 from starkware.starknet.testing.objects import Dataclass, StarknetTransactionExecutionInfo
 from starkware.starknet.testing.state import CastableToAddress, StarknetState
 from starkware.starknet.utils.api_utils import cast_to_felts
+from starkware.starknet.business_logic.execution.objects import TransactionExecutionInfo
 
 # Represents Python types, in particular those that are parallel to the cairo ones:
 # int, tuple and list (matching the cairo types TypeFelt, TypeTuple/TypeStruct and TypePointer).
@@ -272,7 +273,7 @@ class StarknetContractFunctionInvocation:
 
     async def call(
         self, caller_address: int = 0, signature: List[int] = None
-    ) -> StarknetTransactionExecutionInfo:
+    ) -> TransactionExecutionInfo:
         """
         Executes the function call without changing the state.
         """
@@ -282,7 +283,7 @@ class StarknetContractFunctionInvocation:
 
     async def invoke(
         self, caller_address: int = 0, max_fee: int = 0, signature: List[int] = None
-    ) -> StarknetTransactionExecutionInfo:
+    ) -> TransactionExecutionInfo:
         """
         Executes the function call and apply changes on the state.
         """
@@ -296,7 +297,7 @@ class StarknetContractFunctionInvocation:
         caller_address: int = 0,
         max_fee: int = 0,
         signature: List[int] = None,
-    ) -> StarknetTransactionExecutionInfo:
+    ) -> TransactionExecutionInfo:
         """
         Executes the function call and apply changes on the given state.
         """
@@ -308,24 +309,7 @@ class StarknetContractFunctionInvocation:
             max_fee=max_fee,
             signature=None if signature is None else cast_to_felts(values=signature),
         )
-        # Check if function has @raw_output.
-        if self.has_raw_output:
-            # Return the result as a raw tuple.
-            result = tuple(execution_info.call_info.retdata)
-        else:
-            args = self._build_arguments(
-                arg_values=execution_info.call_info.retdata,
-                arg_types=self.retdata_arg_types,
-            )
-            result = self.retdata_tuple(*args)
-
-        main_call_raw_events = execution_info.call_info.events
-
-        return StarknetTransactionExecutionInfo.from_internal(
-            tx_execution_info=execution_info,
-            result=result,
-            main_call_events=self._build_events(raw_events=main_call_raw_events),
-        )
+        return execution_info
 
     def _build_events(self, raw_events: List[OrderedEvent]) -> List[Dataclass]:
         """
