@@ -301,7 +301,7 @@ class StarknetContractFunctionInvocation:
         """
         Executes the function call and apply changes on the given state.
         """
-        return state.invoke_raw(
+        return await state.invoke_raw(
             contract_address=self.contract_address,
             selector=self.name,
             calldata=self.calldata,
